@@ -42,10 +42,6 @@ function stopAutoSliding() {
     isAutoSliding = false;
 }
 
-
-
-
-
 // Обработчик колесика мыши для ПК
 window.addEventListener('wheel', function (event) {
     if (window.innerWidth > 530) { // Только для ПК
@@ -86,6 +82,63 @@ window.addEventListener('wheel', function (event) {
         }
     }
 }, { passive: false });
+
+// Включение обычной прокрутки на мобильных устройствах
+let startY = 0;
+let isScrolling = false;
+
+window.addEventListener('touchstart', function (event) {
+    if (window.innerWidth <= 530) {
+        startY = event.touches[0].clientY;
+        isScrolling = false;
+    }
+}, { passive: true });
+
+window.addEventListener('touchmove', function (event) {
+    if (window.innerWidth <= 530) {
+        let currentY = event.touches[0].clientY;
+        let deltaY = startY - currentY;
+
+        // Если пользователь прокручивает вниз
+        if (deltaY > 10) {
+            isScrolling = true;
+            if (!isNextPage && currentClassIndex < 3) {
+                currentClassIndex++;
+                updateBackground();
+            } else if (!isNextPage && currentClassIndex === 3) {
+                isNextPage = true;
+                nextContent.style.display = 'block';
+                smoothScroll(nextContent);
+            } else if (!isAdditionalVisible && window.scrollY + window.innerHeight >= document.body.scrollHeight - 50) {
+                additionalContent.style.display = 'block';
+                smoothScroll(additionalContent);
+                isAdditionalVisible = true;
+            }
+        }
+        // Если пользователь прокручивает вверх
+        else if (deltaY < -10) {
+            isScrolling = true;
+            if (isAdditionalVisible && window.scrollY <= additionalContent.offsetTop + 50) {
+                isAdditionalVisible = false;
+                smoothScroll(nextContent);
+                setTimeout(() => { additionalContent.style.display = 'none'; }, 500);
+            } else if (isNextPage && window.scrollY <= nextContent.offsetTop + 50) {
+                isNextPage = false;
+                smoothScroll(main);
+                setTimeout(() => { nextContent.style.display = 'none'; }, 500);
+            } else if (!isNextPage && currentClassIndex > 0) {
+                currentClassIndex--;
+                updateBackground();
+            }
+        }
+    }
+}, { passive: true });
+
+window.addEventListener('touchend', function () {
+    if (isScrolling) {
+        stopAutoSliding();
+    }
+}, { passive: true });
 
 // Плавный переход по клику на стрелку
 mainArrow.addEventListener('click', function () {
