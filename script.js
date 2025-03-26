@@ -33,7 +33,7 @@ function startAutoSliding() {
         autoSlideInterval = setInterval(() => {
             currentClassIndex = (currentClassIndex + 1) % 4;
             updateBackground();
-        }, 2500);
+        }, 2000);
     }
 }
 
@@ -85,60 +85,48 @@ window.addEventListener('wheel', function (event) {
 
 // Включение обычной прокрутки на мобильных устройствах
 let startY = 0;
-let isScrolling = false;
+// let isScrolling = false;
 
 window.addEventListener('touchstart', function (event) {
     if (window.innerWidth <= 530) {
         startY = event.touches[0].clientY;
-        isScrolling = false;
     }
 }, { passive: true });
+
 
 window.addEventListener('touchmove', function (event) {
-    if (window.innerWidth <= 530) {
-        let currentY = event.touches[0].clientY;
-        let deltaY = startY - currentY;
+    if (window.innerWidth > 530) return;
 
-        // Если пользователь прокручивает вниз
-        if (deltaY > 10) {
-            isScrolling = true;
-            if (!isNextPage && currentClassIndex < 3) {
-                currentClassIndex++;
-                updateBackground();
-            } else if (!isNextPage && currentClassIndex === 3) {
-                isNextPage = true;
-                nextContent.style.display = 'block';
-                smoothScroll(nextContent);
-            } else if (!isAdditionalVisible && window.scrollY + window.innerHeight >= document.body.scrollHeight - 50) {
-                additionalContent.style.display = 'block';
-                smoothScroll(additionalContent);
-                isAdditionalVisible = true;
-            }
+    let currentY = event.touches[0].clientY;
+    let deltaY = startY - currentY;
+
+    if (deltaY > 30) { // Скролл вниз
+        if (!isNextPage) {
+            isNextPage = true;
+            nextContent.style.display = 'block';
+            smoothScroll(nextContent);
+            event.preventDefault(); // Блокируем только при переходе к следующему контенту
+        } else if (!isAdditionalVisible && window.scrollY + window.innerHeight >= document.body.scrollHeight - 50) {
+            additionalContent.style.display = 'block';
+            smoothScroll(additionalContent);
+            isAdditionalVisible = true;
+            event.preventDefault(); // Блокируем только при переходе к дополнительному контенту
         }
-        // Если пользователь прокручивает вверх
-        else if (deltaY < -10) {
-            isScrolling = true;
-            if (isAdditionalVisible && window.scrollY <= additionalContent.offsetTop + 50) {
-                isAdditionalVisible = false;
-                smoothScroll(nextContent);
-                setTimeout(() => { additionalContent.style.display = 'none'; }, 500);
-            } else if (isNextPage && window.scrollY <= nextContent.offsetTop + 50) {
-                isNextPage = false;
-                smoothScroll(main);
-                setTimeout(() => { nextContent.style.display = 'none'; }, 500);
-            } else if (!isNextPage && currentClassIndex > 0) {
-                currentClassIndex--;
-                updateBackground();
-            }
+    } else if (deltaY < -30) { // Скролл вверх
+        if (isAdditionalVisible && window.scrollY <= additionalContent.offsetTop + 50) {
+            isAdditionalVisible = false;
+            smoothScroll(nextContent);
+            setTimeout(() => { additionalContent.style.display = 'none'; }, 500);
+            event.preventDefault();
+        } else if (isNextPage && window.scrollY <= nextContent.offsetTop + 50) {
+            isNextPage = false;
+            smoothScroll(main);
+            setTimeout(() => { nextContent.style.display = 'none'; }, 500);
+            event.preventDefault();
         }
     }
-}, { passive: true });
+}, { passive: false });
 
-window.addEventListener('touchend', function () {
-    if (isScrolling) {
-        stopAutoSliding();
-    }
-}, { passive: true });
 
 // Плавный переход по клику на стрелку
 mainArrow.addEventListener('click', function () {
@@ -179,8 +167,5 @@ form.addEventListener('submit', (e) => {
     form.reset();
 });
 
-window.addEventListener('load', () => {
-    startAutoSliding();
-});
+window.addEventListener('load', startAutoSliding);
 window.addEventListener('blur', stopAutoSliding);
-
