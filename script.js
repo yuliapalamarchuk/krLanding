@@ -105,7 +105,7 @@ window.addEventListener('touchmove', function (event) {
             nextContent.style.display = 'block';
             smoothScroll(nextContent);
             event.preventDefault(); // Блокируем только при переходе к следующему контенту
-        } else if (!isAdditionalVisible && window.scrollY + window.innerHeight >= document.body.scrollHeight - 50) {
+        } else if (!isAdditionalVisible && window.scrollY + window.innerHeight >= nextContent.offsetTop + nextContent.offsetHeight - 50) {
             additionalContent.style.display = 'block';
             smoothScroll(additionalContent);
             isAdditionalVisible = true;

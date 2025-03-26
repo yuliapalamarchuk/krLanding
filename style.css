@@ -484,7 +484,7 @@ input[type='number']::-webkit-outer-spin-button {
     }
     .next-content__arrow,
     .main-content__arrow {
-        bottom: 0px;
+        bottom: 23px;
         left: 47%;
     }
     .next-content__cards-wrapper {
