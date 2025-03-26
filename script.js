@@ -85,7 +85,6 @@ window.addEventListener('wheel', function (event) {
 
 // Включение обычной прокрутки на мобильных устройствах
 let startY = 0;
-// let isScrolling = false;
 
 window.addEventListener('touchstart', function (event) {
     if (window.innerWidth <= 530) {
